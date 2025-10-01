@@ -452,7 +452,7 @@
           "refId": "Requests"
         },
         {
-          "expr": "requests_limits{type=\"monitoring.write.throughput.requests\"}",
+          "expr": "requests_limits{type=\"monitoring.read.throughput.requests\"}",
           "instant": false,
           "range": true,
           "legendFormat": "Limit",

@@ -176,7 +176,7 @@ var NebiusMonitoring = dashboard.NewDashboardBuilder("Nebius Monitoring").
 			).
 			WithTarget(
 				prometheus.NewDataqueryBuilder().
-					Expr(`requests_limits{type="monitoring.write.throughput.requests"}`).
+					Expr(`requests_limits{type="monitoring.read.throughput.requests"}`).
 					LegendFormat("Limit").
 					RefId("Limit").
 					Range(),
