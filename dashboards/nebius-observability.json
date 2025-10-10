@@ -132,92 +132,6 @@
       "type": "timeseries",
       "targets": [
         {
-          "expr": "sum(rate(requests_total{type=\"read\"}[$__rate_interval]))",
-          "instant": false,
-          "range": true,
-          "legendFormat": "Requests",
-          "refId": "Requests"
-        },
-        {
-          "expr": "requests_limits{type=\"monitoring.read.throughput.requests\"}",
-          "instant": false,
-          "range": true,
-          "legendFormat": "Limit",
-          "refId": "Limit"
-        }
-      ],
-      "title": "Read requests",
-      "description": "Number of metrics read requests per second",
-      "transparent": false,
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${datasource}"
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 1
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "reqps"
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byFrameRefID",
-              "options": "Limit"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "dark-red"
-                }
-              },
-              {
-                "id": "custom.drawStyle",
-                "value": "line"
-              },
-              {
-                "id": "custom.showPoints",
-                "value": "never"
-              },
-              {
-                "id": "custom.lineWidth",
-                "value": 1
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": ".*"
-            },
-            "properties": [
-              {
-                "id": "custom.drawStyle",
-                "value": "line"
-              },
-              {
-                "id": "custom.showPoints",
-                "value": "never"
-              },
-              {
-                "id": "custom.lineWidth",
-                "value": 1
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "type": "timeseries",
-      "targets": [
-        {
           "expr": "sum by (status_code) (rate(requests_total{status_code!~\"2.*\", type=\"write\"}[$__rate_interval])) or on() vector(0)",
           "instant": false,
           "range": true,
@@ -235,8 +149,8 @@
       "gridPos": {
         "h": 8,
         "w": 12,
-        "x": 0,
-        "y": 9
+        "x": 12,
+        "y": 1
       },
       "fieldConfig": {
         "defaults": {
@@ -506,6 +420,92 @@
                 "value": {
                   "mode": "fixed",
                   "fixedColor": "#FFEE58"
+                }
+              },
+              {
+                "id": "custom.drawStyle",
+                "value": "line"
+              },
+              {
+                "id": "custom.showPoints",
+                "value": "never"
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*"
+            },
+            "properties": [
+              {
+                "id": "custom.drawStyle",
+                "value": "line"
+              },
+              {
+                "id": "custom.showPoints",
+                "value": "never"
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum(rate(requests_total{type=\"read\"}[$__rate_interval]))",
+          "instant": false,
+          "range": true,
+          "legendFormat": "Requests",
+          "refId": "Requests"
+        },
+        {
+          "expr": "requests_limits{type=\"monitoring.read.throughput.requests\"}",
+          "instant": false,
+          "range": true,
+          "legendFormat": "Limit",
+          "refId": "Limit"
+        }
+      ],
+      "title": "Read requests",
+      "description": "Number of metrics read requests per second",
+      "transparent": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 9
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "Limit"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "dark-red"
                 }
               },
               {
@@ -889,58 +889,6 @@
       "type": "timeseries",
       "targets": [
         {
-          "expr": "sum(rate(logging_read_requests_total{status=\"ok\"}[$__rate_interval])) OR on() vector(0)",
-          "instant": false,
-          "range": true,
-          "legendFormat": "requests",
-          "refId": "A"
-        }
-      ],
-      "title": "Read requests",
-      "description": "Number of successful log read/query requests per second",
-      "transparent": false,
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${datasource}"
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 26
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "reqps"
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": ".*"
-            },
-            "properties": [
-              {
-                "id": "custom.drawStyle",
-                "value": "line"
-              },
-              {
-                "id": "custom.showPoints",
-                "value": "never"
-              },
-              {
-                "id": "custom.lineWidth",
-                "value": 1
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "type": "timeseries",
-      "targets": [
-        {
           "expr": "sum by(status) (rate(logging_ingest_requests_total{status!=\"ok\"}[$__rate_interval])) or on() vector(0)",
           "instant": false,
           "range": true,
@@ -958,8 +906,8 @@
       "gridPos": {
         "h": 8,
         "w": 12,
-        "x": 0,
-        "y": 34
+        "x": 12,
+        "y": 26
       },
       "fieldConfig": {
         "defaults": {
@@ -1061,6 +1009,58 @@
               }
             ]
           },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*"
+            },
+            "properties": [
+              {
+                "id": "custom.drawStyle",
+                "value": "line"
+              },
+              {
+                "id": "custom.showPoints",
+                "value": "never"
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum(rate(logging_read_requests_total{status=\"ok\"}[$__rate_interval])) OR on() vector(0)",
+          "instant": false,
+          "range": true,
+          "legendFormat": "requests",
+          "refId": "A"
+        }
+      ],
+      "title": "Read requests",
+      "description": "Number of successful log read/query requests per second",
+      "transparent": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 34
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps"
+        },
+        "overrides": [
           {
             "matcher": {
               "id": "byRegexp",

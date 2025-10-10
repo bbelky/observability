@@ -61,44 +61,7 @@ var NebiusObservability = dashboard.NewDashboardBuilder("Nebius Observability").
 				{Id: "custom.showPoints", Value: "never"},
 				{Id: "custom.lineWidth", Value: 1},
 			}).
-			WithOverride(
-				dashboard.MatcherConfig{Id: "byRegexp", Options: ".*"},
-				[]dashboard.DynamicConfigValue{
-					{Id: "custom.drawStyle", Value: "line"},
-					{Id: "custom.showPoints", Value: "never"},
-					{Id: "custom.lineWidth", Value: 1},
-				},
-			),
-	).
-	WithPanel(
-		timeseries.NewPanelBuilder().
-			Title("Read requests").
-			Datasource(DatasourceRef).
-			Description("Number of metrics read requests per second").
-			Unit("reqps").
-			GridPos(dashboard.GridPos{H: 8, W: 12, X: 12, Y: 1}).
-			WithTarget(
-				prometheus.NewDataqueryBuilder().
-					Expr(`sum(rate(requests_total{type="read"}[$__rate_interval]))`).
-					LegendFormat("Requests").
-					RefId("Requests").
-					Range(),
-			).
-			WithTarget(
-				prometheus.NewDataqueryBuilder().
-					Expr(`requests_limits{type="monitoring.read.throughput.requests"}`).
-					LegendFormat("Limit").
-					RefId("Limit").
-					Range(),
-			).
-			OverrideByQuery("Limit", []dashboard.DynamicConfigValue{
-				fixedColor("dark-red"),
-				{Id: "custom.drawStyle", Value: "line"},
-				{Id: "custom.showPoints", Value: "never"},
-				{Id: "custom.lineWidth", Value: 1},
-			}).
-			WithOverride(
-				dashboard.MatcherConfig{Id: "byRegexp", Options: ".*"},
+			WithOverride(dashboard.MatcherConfig{Id: "byRegexp", Options: ".*"},
 				[]dashboard.DynamicConfigValue{
 					{Id: "custom.drawStyle", Value: "line"},
 					{Id: "custom.showPoints", Value: "never"},
@@ -112,7 +75,7 @@ var NebiusObservability = dashboard.NewDashboardBuilder("Nebius Observability").
 			Datasource(DatasourceRef).
 			Description("Number of failed metrics ingestion requests per second, by status code").
 			Unit("reqps").
-			GridPos(dashboard.GridPos{H: 8, W: 12, X: 0, Y: 9}).
+			GridPos(dashboard.GridPos{H: 8, W: 12, X: 12, Y: 1}).
 			WithTarget(
 				prometheus.NewDataqueryBuilder().
 					Expr(`sum by (status_code) (rate(requests_total{status_code!~"2.*", type="write"}[$__rate_interval])) or on() vector(0)`).
@@ -156,8 +119,42 @@ var NebiusObservability = dashboard.NewDashboardBuilder("Nebius Observability").
 				{Id: "displayName", Value: "429: Too Many Requests"}, fixedColor("#FFEE58"),
 				{Id: "custom.drawStyle", Value: "line"}, {Id: "custom.showPoints", Value: "never"}, {Id: "custom.lineWidth", Value: 1},
 			}).
-			WithOverride(
-				dashboard.MatcherConfig{Id: "byRegexp", Options: ".*"},
+			WithOverride(dashboard.MatcherConfig{Id: "byRegexp", Options: ".*"},
+				[]dashboard.DynamicConfigValue{
+					{Id: "custom.drawStyle", Value: "line"},
+					{Id: "custom.showPoints", Value: "never"},
+					{Id: "custom.lineWidth", Value: 1},
+				},
+			),
+	).
+	WithPanel(
+		timeseries.NewPanelBuilder().
+			Title("Read requests").
+			Datasource(DatasourceRef).
+			Description("Number of metrics read requests per second").
+			Unit("reqps").
+			GridPos(dashboard.GridPos{H: 8, W: 12, X: 0, Y: 9}).
+			WithTarget(
+				prometheus.NewDataqueryBuilder().
+					Expr(`sum(rate(requests_total{type="read"}[$__rate_interval]))`).
+					LegendFormat("Requests").
+					RefId("Requests").
+					Range(),
+			).
+			WithTarget(
+				prometheus.NewDataqueryBuilder().
+					Expr(`requests_limits{type="monitoring.read.throughput.requests"}`).
+					LegendFormat("Limit").
+					RefId("Limit").
+					Range(),
+			).
+			OverrideByQuery("Limit", []dashboard.DynamicConfigValue{
+				fixedColor("dark-red"),
+				{Id: "custom.drawStyle", Value: "line"},
+				{Id: "custom.showPoints", Value: "never"},
+				{Id: "custom.lineWidth", Value: 1},
+			}).
+			WithOverride(dashboard.MatcherConfig{Id: "byRegexp", Options: ".*"},
 				[]dashboard.DynamicConfigValue{
 					{Id: "custom.drawStyle", Value: "line"},
 					{Id: "custom.showPoints", Value: "never"},
@@ -188,8 +185,7 @@ var NebiusObservability = dashboard.NewDashboardBuilder("Nebius Observability").
 			OverrideByName("412", []dashboard.DynamicConfigValue{{Id: "displayName", Value: "412: Invalid token"}, fixedColor("#FFE084")}).
 			OverrideByName("422", []dashboard.DynamicConfigValue{{Id: "displayName", Value: "422: Unprocessable Entity"}, fixedColor("#FFC1E3")}).
 			OverrideByName("429", []dashboard.DynamicConfigValue{{Id: "displayName", Value: "429: Too Many Requests"}, fixedColor("#FFEE58")}).
-			WithOverride(
-				dashboard.MatcherConfig{Id: "byRegexp", Options: ".*"},
+			WithOverride(dashboard.MatcherConfig{Id: "byRegexp", Options: ".*"},
 				[]dashboard.DynamicConfigValue{
 					{Id: "custom.drawStyle", Value: "line"},
 					{Id: "custom.showPoints", Value: "never"},
@@ -211,8 +207,7 @@ var NebiusObservability = dashboard.NewDashboardBuilder("Nebius Observability").
 					RefId("Samples rate by type").
 					Range(),
 			).
-			WithOverride(
-				dashboard.MatcherConfig{Id: "byRegexp", Options: ".*"},
+			WithOverride(dashboard.MatcherConfig{Id: "byRegexp", Options: ".*"},
 				[]dashboard.DynamicConfigValue{
 					{Id: "custom.drawStyle", Value: "line"},
 					{Id: "custom.showPoints", Value: "never"},
@@ -239,31 +234,7 @@ var NebiusObservability = dashboard.NewDashboardBuilder("Nebius Observability").
 					RefId("A").
 					Range(),
 			).
-			WithOverride(
-				dashboard.MatcherConfig{Id: "byRegexp", Options: ".*"},
-				[]dashboard.DynamicConfigValue{
-					{Id: "custom.drawStyle", Value: "line"},
-					{Id: "custom.showPoints", Value: "never"},
-					{Id: "custom.lineWidth", Value: 1},
-				},
-			),
-	).
-	WithPanel(
-		timeseries.NewPanelBuilder().
-			Title("Read requests").
-			Datasource(DatasourceRef).
-			Description("Number of successful log read/query requests per second").
-			Unit("reqps").
-			GridPos(dashboard.GridPos{H: 8, W: 12, X: 12, Y: 26}).
-			WithTarget(
-				prometheus.NewDataqueryBuilder().
-					Expr(`sum(rate(logging_read_requests_total{status="ok"}[$__rate_interval])) OR on() vector(0)`).
-					LegendFormat("requests").
-					RefId("A").
-					Range(),
-			).
-			WithOverride(
-				dashboard.MatcherConfig{Id: "byRegexp", Options: ".*"},
+			WithOverride(dashboard.MatcherConfig{Id: "byRegexp", Options: ".*"},
 				[]dashboard.DynamicConfigValue{
 					{Id: "custom.drawStyle", Value: "line"},
 					{Id: "custom.showPoints", Value: "never"},
@@ -277,7 +248,7 @@ var NebiusObservability = dashboard.NewDashboardBuilder("Nebius Observability").
 			Datasource(DatasourceRef).
 			Description("Number of failed log ingestion requests per second, by status code").
 			Unit("reqps").
-			GridPos(dashboard.GridPos{H: 8, W: 12, X: 0, Y: 34}).
+			GridPos(dashboard.GridPos{H: 8, W: 12, X: 12, Y: 26}).
 			WithTarget(
 				prometheus.NewDataqueryBuilder().
 					Expr(`sum by(status) (rate(logging_ingest_requests_total{status!="ok"}[$__rate_interval])) or on() vector(0)`).
@@ -290,8 +261,29 @@ var NebiusObservability = dashboard.NewDashboardBuilder("Nebius Observability").
 			OverrideByName("err_validate", []dashboard.DynamicConfigValue{{Id: "displayName", Value: "Validation error"}, fixedColor("#FF9E80")}).
 			OverrideByName("quota_exceeded", []dashboard.DynamicConfigValue{{Id: "displayName", Value: "Quota exceeded"}, fixedColor("#FFB347")}).
 			OverrideByName("workspace_inactive", []dashboard.DynamicConfigValue{{Id: "displayName", Value: "Inactive workspace"}, fixedColor("#FFD966")}).
-			WithOverride(
-				dashboard.MatcherConfig{Id: "byRegexp", Options: ".*"},
+			WithOverride(dashboard.MatcherConfig{Id: "byRegexp", Options: ".*"},
+				[]dashboard.DynamicConfigValue{
+					{Id: "custom.drawStyle", Value: "line"},
+					{Id: "custom.showPoints", Value: "never"},
+					{Id: "custom.lineWidth", Value: 1},
+				},
+			),
+	).
+	WithPanel(
+		timeseries.NewPanelBuilder().
+			Title("Read requests").
+			Datasource(DatasourceRef).
+			Description("Number of successful log read/query requests per second").
+			Unit("reqps").
+			GridPos(dashboard.GridPos{H: 8, W: 12, X: 0, Y: 34}).
+			WithTarget(
+				prometheus.NewDataqueryBuilder().
+					Expr(`sum(rate(logging_read_requests_total{status="ok"}[$__rate_interval])) OR on() vector(0)`).
+					LegendFormat("requests").
+					RefId("A").
+					Range(),
+			).
+			WithOverride(dashboard.MatcherConfig{Id: "byRegexp", Options: ".*"},
 				[]dashboard.DynamicConfigValue{
 					{Id: "custom.drawStyle", Value: "line"},
 					{Id: "custom.showPoints", Value: "never"},
@@ -318,8 +310,7 @@ var NebiusObservability = dashboard.NewDashboardBuilder("Nebius Observability").
 			OverrideByName("err_validate", []dashboard.DynamicConfigValue{{Id: "displayName", Value: "Validation error"}, fixedColor("#FF9E80")}).
 			OverrideByName("quota_exceeded", []dashboard.DynamicConfigValue{{Id: "displayName", Value: "Quota exceeded"}, fixedColor("#FFB347")}).
 			OverrideByName("workspace_inactive", []dashboard.DynamicConfigValue{{Id: "displayName", Value: "Inactive workspace"}, fixedColor("#FFD966")}).
-			WithOverride(
-				dashboard.MatcherConfig{Id: "byRegexp", Options: ".*"},
+			WithOverride(dashboard.MatcherConfig{Id: "byRegexp", Options: ".*"},
 				[]dashboard.DynamicConfigValue{
 					{Id: "custom.drawStyle", Value: "line"},
 					{Id: "custom.showPoints", Value: "never"},
@@ -339,8 +330,7 @@ var NebiusObservability = dashboard.NewDashboardBuilder("Nebius Observability").
 			WithTarget(prometheus.NewDataqueryBuilder().Expr(`histogram_quantile(0.90, sum by(le)(rate(logging_ingest_duration_seconds_bucket{}[$__rate_interval])))`).LegendFormat("p90").RefId("C").Range()).
 			WithTarget(prometheus.NewDataqueryBuilder().Expr(`histogram_quantile(0.95, sum by(le)(rate(logging_ingest_duration_seconds_bucket{}[$__rate_interval])))`).LegendFormat("p95").RefId("D").Range()).
 			WithTarget(prometheus.NewDataqueryBuilder().Expr(`histogram_quantile(0.99, sum by(le)(rate(logging_ingest_duration_seconds_bucket{}[$__rate_interval])))`).LegendFormat("p99").RefId("E").Range()).
-			WithOverride(
-				dashboard.MatcherConfig{Id: "byRegexp", Options: ".*"},
+			WithOverride(dashboard.MatcherConfig{Id: "byRegexp", Options: ".*"},
 				[]dashboard.DynamicConfigValue{{Id: "custom.drawStyle", Value: "line"}, {Id: "custom.showPoints", Value: "never"}, {Id: "custom.lineWidth", Value: 1}},
 			),
 	).
@@ -356,8 +346,7 @@ var NebiusObservability = dashboard.NewDashboardBuilder("Nebius Observability").
 			WithTarget(prometheus.NewDataqueryBuilder().Expr(`histogram_quantile(0.90, sum by(le)(rate(logging_storage_save_lag_seconds_bucket{}[$__rate_interval])))`).LegendFormat("p90").RefId("C").Range()).
 			WithTarget(prometheus.NewDataqueryBuilder().Expr(`histogram_quantile(0.95, sum by(le)(rate(logging_storage_save_lag_seconds_bucket{}[$__rate_interval])))`).LegendFormat("p95").RefId("D").Range()).
 			WithTarget(prometheus.NewDataqueryBuilder().Expr(`histogram_quantile(0.99, sum by(le)(rate(logging_storage_save_lag_seconds_bucket{}[$__rate_interval])))`).LegendFormat("p99").RefId("E").Range()).
-			WithOverride(
-				dashboard.MatcherConfig{Id: "byRegexp", Options: ".*"},
+			WithOverride(dashboard.MatcherConfig{Id: "byRegexp", Options: ".*"},
 				[]dashboard.DynamicConfigValue{{Id: "custom.drawStyle", Value: "line"}, {Id: "custom.showPoints", Value: "never"}, {Id: "custom.lineWidth", Value: 1}},
 			),
 	).
@@ -375,8 +364,7 @@ var NebiusObservability = dashboard.NewDashboardBuilder("Nebius Observability").
 					RefId("A").
 					Range(),
 			).
-			WithOverride(
-				dashboard.MatcherConfig{Id: "byRegexp", Options: ".*"},
+			WithOverride(dashboard.MatcherConfig{Id: "byRegexp", Options: ".*"},
 				[]dashboard.DynamicConfigValue{{Id: "custom.drawStyle", Value: "line"}, {Id: "custom.showPoints", Value: "never"}, {Id: "custom.lineWidth", Value: 1}},
 			),
 	).
@@ -394,8 +382,7 @@ var NebiusObservability = dashboard.NewDashboardBuilder("Nebius Observability").
 					RefId("A").
 					Range(),
 			).
-			WithOverride(
-				dashboard.MatcherConfig{Id: "byRegexp", Options: ".*"},
+			WithOverride(dashboard.MatcherConfig{Id: "byRegexp", Options: ".*"},
 				[]dashboard.DynamicConfigValue{{Id: "custom.drawStyle", Value: "line"}, {Id: "custom.showPoints", Value: "never"}, {Id: "custom.lineWidth", Value: 1}},
 			),
 	)
