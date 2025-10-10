@@ -22,7 +22,7 @@ func main() {
 		NebiusGPU,
 		NebiusObjectStorage,
 		NebiusSharedFilesystem,
-		NebiusMonitoring,
+		NebiusObservability,
 	} {
 		d, err := b.Build()
 		if err != nil {
