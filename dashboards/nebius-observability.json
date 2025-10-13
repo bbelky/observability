@@ -1,14 +1,14 @@
 {
   "uid": "nebius-observability",
-  "title": "Nebius Observability",
+  "title": "Nebius Observability Platform",
   "description": "Unified overview of Nebius Observability. https://docs.nebius.com/observability",
   "tags": [
     "Nebius",
-    "Observability"
+    "Observability Platform"
   ],
   "timezone": "browser",
   "editable": false,
-  "graphTooltip": 0,
+  "graphTooltip": 1,
   "time": {
     "from": "now-1h",
     "to": "now"
@@ -34,7 +34,7 @@
       "type": "timeseries",
       "targets": [
         {
-          "expr": "sum(rate(requests_total{type=\"write\"}[$__rate_interval]))",
+          "expr": "sum(rate(requests_total{type=\"write\"}[$__rate_interval])) or on() vector(0)",
           "instant": false,
           "range": true,
           "legendFormat": "Requests",
@@ -463,7 +463,7 @@
       "type": "timeseries",
       "targets": [
         {
-          "expr": "sum(rate(requests_total{type=\"read\"}[$__rate_interval]))",
+          "expr": "sum(rate(requests_total{type=\"read\"}[$__rate_interval])) or on() vector(0)",
           "instant": false,
           "range": true,
           "legendFormat": "Requests",
@@ -840,7 +840,7 @@
           "expr": "sum(rate(logging_ingest_requests_total{status=\"ok\"}[$__rate_interval])) OR on() vector(0)",
           "instant": false,
           "range": true,
-          "legendFormat": "requests",
+          "legendFormat": "Requests",
           "refId": "A"
         }
       ],
@@ -1039,7 +1039,7 @@
           "expr": "sum(rate(logging_read_requests_total{status=\"ok\"}[$__rate_interval])) OR on() vector(0)",
           "instant": false,
           "range": true,
-          "legendFormat": "requests",
+          "legendFormat": "Requests",
           "refId": "A"
         }
       ],
@@ -1088,7 +1088,7 @@
       "type": "timeseries",
       "targets": [
         {
-          "expr": "sum by(status) (rate(logging_read_requests_total{status!=\"ok\"}[$__rate_interval]))",
+          "expr": "sum by(status) (rate(logging_read_requests_total{status!=\"ok\"}[$__rate_interval])) or on() vector(0)",
           "instant": false,
           "range": true,
           "legendFormat": "{{status}}",
@@ -1235,6 +1235,110 @@
       "type": "timeseries",
       "targets": [
         {
+          "expr": "sum(rate(logging_ingest_logs_total{}[$__rate_interval])) OR on() vector(0)",
+          "instant": false,
+          "range": true,
+          "legendFormat": "Lines",
+          "refId": "A"
+        }
+      ],
+      "title": "Written lines rate",
+      "description": "Number of log lines ingested per second",
+      "transparent": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 42
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*"
+            },
+            "properties": [
+              {
+                "id": "custom.drawStyle",
+                "value": "line"
+              },
+              {
+                "id": "custom.showPoints",
+                "value": "never"
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum(rate(logging_ingest_logs_bytes_total{}[$__rate_interval])) OR on() vector(0)",
+          "instant": false,
+          "range": true,
+          "legendFormat": "Data",
+          "refId": "A"
+        }
+      ],
+      "title": "Write bytes",
+      "description": "Volume of log data ingested per second in bytes",
+      "transparent": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 42
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "binBps"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*"
+            },
+            "properties": [
+              {
+                "id": "custom.drawStyle",
+                "value": "line"
+              },
+              {
+                "id": "custom.showPoints",
+                "value": "never"
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "timeseries",
+      "targets": [
+        {
           "expr": "histogram_quantile(0.5, sum by(le)(rate(logging_ingest_duration_seconds_bucket{}[$__rate_interval])))",
           "instant": false,
           "range": true,
@@ -1281,7 +1385,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 42
+        "y": 50
       },
       "fieldConfig": {
         "defaults": {
@@ -1361,115 +1465,11 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 42
+        "y": 50
       },
       "fieldConfig": {
         "defaults": {
           "unit": "s"
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": ".*"
-            },
-            "properties": [
-              {
-                "id": "custom.drawStyle",
-                "value": "line"
-              },
-              {
-                "id": "custom.showPoints",
-                "value": "never"
-              },
-              {
-                "id": "custom.lineWidth",
-                "value": 1
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "type": "timeseries",
-      "targets": [
-        {
-          "expr": "sum(rate(logging_ingest_logs_total{}[$__rate_interval])) OR on() vector(0)",
-          "instant": false,
-          "range": true,
-          "legendFormat": "lines",
-          "refId": "A"
-        }
-      ],
-      "title": "Written lines rate",
-      "description": "Number of log lines ingested per second",
-      "transparent": false,
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${datasource}"
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 50
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short"
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": ".*"
-            },
-            "properties": [
-              {
-                "id": "custom.drawStyle",
-                "value": "line"
-              },
-              {
-                "id": "custom.showPoints",
-                "value": "never"
-              },
-              {
-                "id": "custom.lineWidth",
-                "value": 1
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "type": "timeseries",
-      "targets": [
-        {
-          "expr": "sum(rate(logging_ingest_logs_bytes_total{}[$__rate_interval])) OR on() vector(0)",
-          "instant": false,
-          "range": true,
-          "legendFormat": "data",
-          "refId": "A"
-        }
-      ],
-      "title": "Write bytes",
-      "description": "Volume of log data ingested per second in bytes",
-      "transparent": false,
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${datasource}"
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 50
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "binBps"
         },
         "overrides": [
           {

@@ -6,13 +6,14 @@ import (
 	"github.com/grafana/grafana-foundation-sdk/go/timeseries"
 )
 
-var NebiusObservability = dashboard.NewDashboardBuilder("Nebius Observability").
+var NebiusObservability = dashboard.NewDashboardBuilder("Nebius Observability Platform").
 	Uid("nebius-observability").
-	Tags([]string{"Nebius", "Observability"}).
+	Tags([]string{"Nebius", "Observability Platform"}).
 	Refresh("1m").
 	Time("now-1h", "now").
 	Timezone("browser").
 	Readonly().
+	Tooltip(dashboard.DashboardCursorSyncCrosshair).
 	WithVariable(DatasourceVar).
 	Description("Unified overview of Nebius Observability. https://docs.nebius.com/observability").
 	Link(dashboard.NewDashboardLinkBuilder("Docs").
@@ -41,7 +42,7 @@ var NebiusObservability = dashboard.NewDashboardBuilder("Nebius Observability").
 			GridPos(dashboard.GridPos{H: 8, W: 12, X: 0, Y: 1}).
 			WithTarget(
 				prometheus.NewDataqueryBuilder().
-					Expr(`sum(rate(requests_total{type="write"}[$__rate_interval]))`).
+					Expr(`sum(rate(requests_total{type="write"}[$__rate_interval])) or on() vector(0)`).
 					LegendFormat("Requests").
 					RefId("Requests rate").
 					Range(),
@@ -136,7 +137,7 @@ var NebiusObservability = dashboard.NewDashboardBuilder("Nebius Observability").
 			GridPos(dashboard.GridPos{H: 8, W: 12, X: 0, Y: 9}).
 			WithTarget(
 				prometheus.NewDataqueryBuilder().
-					Expr(`sum(rate(requests_total{type="read"}[$__rate_interval]))`).
+					Expr(`sum(rate(requests_total{type="read"}[$__rate_interval])) or on() vector(0)`).
 					LegendFormat("Requests").
 					RefId("Requests").
 					Range(),
@@ -230,7 +231,7 @@ var NebiusObservability = dashboard.NewDashboardBuilder("Nebius Observability").
 			WithTarget(
 				prometheus.NewDataqueryBuilder().
 					Expr(`sum(rate(logging_ingest_requests_total{status="ok"}[$__rate_interval])) OR on() vector(0)`).
-					LegendFormat("requests").
+					LegendFormat("Requests").
 					RefId("A").
 					Range(),
 			).
@@ -279,7 +280,7 @@ var NebiusObservability = dashboard.NewDashboardBuilder("Nebius Observability").
 			WithTarget(
 				prometheus.NewDataqueryBuilder().
 					Expr(`sum(rate(logging_read_requests_total{status="ok"}[$__rate_interval])) OR on() vector(0)`).
-					LegendFormat("requests").
+					LegendFormat("Requests").
 					RefId("A").
 					Range(),
 			).
@@ -300,7 +301,7 @@ var NebiusObservability = dashboard.NewDashboardBuilder("Nebius Observability").
 			GridPos(dashboard.GridPos{H: 8, W: 12, X: 12, Y: 34}).
 			WithTarget(
 				prometheus.NewDataqueryBuilder().
-					Expr(`sum by(status) (rate(logging_read_requests_total{status!="ok"}[$__rate_interval]))`).
+					Expr(`sum by(status) (rate(logging_read_requests_total{status!="ok"}[$__rate_interval])) or on() vector(0)`).
 					LegendFormat("{{status}}").
 					RefId("A").
 					Range(),
@@ -320,11 +321,47 @@ var NebiusObservability = dashboard.NewDashboardBuilder("Nebius Observability").
 	).
 	WithPanel(
 		timeseries.NewPanelBuilder().
+			Title("Written lines rate").
+			Datasource(DatasourceRef).
+			Description("Number of log lines ingested per second").
+			Unit("short").
+			GridPos(dashboard.GridPos{H: 8, W: 12, X: 0, Y: 42}).
+			WithTarget(
+				prometheus.NewDataqueryBuilder().
+					Expr(`sum(rate(logging_ingest_logs_total{}[$__rate_interval])) OR on() vector(0)`).
+					LegendFormat("Lines").
+					RefId("A").
+					Range(),
+			).
+			WithOverride(dashboard.MatcherConfig{Id: "byRegexp", Options: ".*"},
+				[]dashboard.DynamicConfigValue{{Id: "custom.drawStyle", Value: "line"}, {Id: "custom.showPoints", Value: "never"}, {Id: "custom.lineWidth", Value: 1}},
+			),
+	).
+	WithPanel(
+		timeseries.NewPanelBuilder().
+			Title("Write bytes").
+			Datasource(DatasourceRef).
+			Description("Volume of log data ingested per second in bytes").
+			Unit("binBps").
+			GridPos(dashboard.GridPos{H: 8, W: 12, X: 12, Y: 42}).
+			WithTarget(
+				prometheus.NewDataqueryBuilder().
+					Expr(`sum(rate(logging_ingest_logs_bytes_total{}[$__rate_interval])) OR on() vector(0)`).
+					LegendFormat("Data").
+					RefId("A").
+					Range(),
+			).
+			WithOverride(dashboard.MatcherConfig{Id: "byRegexp", Options: ".*"},
+				[]dashboard.DynamicConfigValue{{Id: "custom.drawStyle", Value: "line"}, {Id: "custom.showPoints", Value: "never"}, {Id: "custom.lineWidth", Value: 1}},
+			),
+	).
+	WithPanel(
+		timeseries.NewPanelBuilder().
 			Title("Write duration (p50/p75/p90/p95/p99)").
 			Datasource(DatasourceRef).
 			Description("Request processing time quantiles for log ingestion operations").
 			Unit("s").
-			GridPos(dashboard.GridPos{H: 8, W: 12, X: 0, Y: 42}).
+			GridPos(dashboard.GridPos{H: 8, W: 12, X: 0, Y: 50}).
 			WithTarget(prometheus.NewDataqueryBuilder().Expr(`histogram_quantile(0.5, sum by(le)(rate(logging_ingest_duration_seconds_bucket{}[$__rate_interval])))`).LegendFormat("p50").RefId("A").Range()).
 			WithTarget(prometheus.NewDataqueryBuilder().Expr(`histogram_quantile(0.75, sum by(le)(rate(logging_ingest_duration_seconds_bucket{}[$__rate_interval])))`).LegendFormat("p75").RefId("B").Range()).
 			WithTarget(prometheus.NewDataqueryBuilder().Expr(`histogram_quantile(0.90, sum by(le)(rate(logging_ingest_duration_seconds_bucket{}[$__rate_interval])))`).LegendFormat("p90").RefId("C").Range()).
@@ -340,48 +377,12 @@ var NebiusObservability = dashboard.NewDashboardBuilder("Nebius Observability").
 			Datasource(DatasourceRef).
 			Description("Time delay between receiving a log and saving it to storage").
 			Unit("s").
-			GridPos(dashboard.GridPos{H: 8, W: 12, X: 12, Y: 42}).
+			GridPos(dashboard.GridPos{H: 8, W: 12, X: 12, Y: 50}).
 			WithTarget(prometheus.NewDataqueryBuilder().Expr(`histogram_quantile(0.5, sum by(le)(rate(logging_storage_save_lag_seconds_bucket{}[$__rate_interval])))`).LegendFormat("p50").RefId("A").Range()).
 			WithTarget(prometheus.NewDataqueryBuilder().Expr(`histogram_quantile(0.75, sum by(le)(rate(logging_storage_save_lag_seconds_bucket{}[$__rate_interval])))`).LegendFormat("p75").RefId("B").Range()).
 			WithTarget(prometheus.NewDataqueryBuilder().Expr(`histogram_quantile(0.90, sum by(le)(rate(logging_storage_save_lag_seconds_bucket{}[$__rate_interval])))`).LegendFormat("p90").RefId("C").Range()).
 			WithTarget(prometheus.NewDataqueryBuilder().Expr(`histogram_quantile(0.95, sum by(le)(rate(logging_storage_save_lag_seconds_bucket{}[$__rate_interval])))`).LegendFormat("p95").RefId("D").Range()).
 			WithTarget(prometheus.NewDataqueryBuilder().Expr(`histogram_quantile(0.99, sum by(le)(rate(logging_storage_save_lag_seconds_bucket{}[$__rate_interval])))`).LegendFormat("p99").RefId("E").Range()).
-			WithOverride(dashboard.MatcherConfig{Id: "byRegexp", Options: ".*"},
-				[]dashboard.DynamicConfigValue{{Id: "custom.drawStyle", Value: "line"}, {Id: "custom.showPoints", Value: "never"}, {Id: "custom.lineWidth", Value: 1}},
-			),
-	).
-	WithPanel(
-		timeseries.NewPanelBuilder().
-			Title("Written lines rate").
-			Datasource(DatasourceRef).
-			Description("Number of log lines ingested per second").
-			Unit("short").
-			GridPos(dashboard.GridPos{H: 8, W: 12, X: 0, Y: 50}).
-			WithTarget(
-				prometheus.NewDataqueryBuilder().
-					Expr(`sum(rate(logging_ingest_logs_total{}[$__rate_interval])) OR on() vector(0)`).
-					LegendFormat("lines").
-					RefId("A").
-					Range(),
-			).
-			WithOverride(dashboard.MatcherConfig{Id: "byRegexp", Options: ".*"},
-				[]dashboard.DynamicConfigValue{{Id: "custom.drawStyle", Value: "line"}, {Id: "custom.showPoints", Value: "never"}, {Id: "custom.lineWidth", Value: 1}},
-			),
-	).
-	WithPanel(
-		timeseries.NewPanelBuilder().
-			Title("Write bytes").
-			Datasource(DatasourceRef).
-			Description("Volume of log data ingested per second in bytes").
-			Unit("binBps").
-			GridPos(dashboard.GridPos{H: 8, W: 12, X: 12, Y: 50}).
-			WithTarget(
-				prometheus.NewDataqueryBuilder().
-					Expr(`sum(rate(logging_ingest_logs_bytes_total{}[$__rate_interval])) OR on() vector(0)`).
-					LegendFormat("data").
-					RefId("A").
-					Range(),
-			).
 			WithOverride(dashboard.MatcherConfig{Id: "byRegexp", Options: ".*"},
 				[]dashboard.DynamicConfigValue{{Id: "custom.drawStyle", Value: "line"}, {Id: "custom.showPoints", Value: "never"}, {Id: "custom.lineWidth", Value: 1}},
 			),
