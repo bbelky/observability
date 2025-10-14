@@ -15,7 +15,7 @@ var NebiusObservability = dashboard.NewDashboardBuilder("Nebius Observability Pl
 	Readonly().
 	Tooltip(dashboard.DashboardCursorSyncCrosshair).
 	WithVariable(DatasourceVar).
-	Description("Unified overview of Nebius Observability. https://docs.nebius.com/observability").
+	Description("Unified overview of Nebius Observability usage. https://docs.nebius.com/observability").
 	Link(dashboard.NewDashboardLinkBuilder("Docs").
 		Type(dashboard.DashboardLinkTypeLink).
 		Url("https://docs.nebius.com/observability").
@@ -71,62 +71,21 @@ var NebiusObservability = dashboard.NewDashboardBuilder("Nebius Observability Pl
 			),
 	).
 	WithPanel(
-		timeseries.NewPanelBuilder().
-			Title("Write errors").
-			Datasource(DatasourceRef).
-			Description("Number of failed metrics ingestion requests per second, by status code").
-			Unit("reqps").
-			GridPos(dashboard.GridPos{H: 8, W: 12, X: 12, Y: 1}).
-			WithTarget(
-				prometheus.NewDataqueryBuilder().
-					Expr(`sum by (status_code) (rate(requests_total{status_code!~"2.*", type="write"}[$__rate_interval])) or on() vector(0)`).
-					LegendFormat("{{status_code}}").
-					RefId("Write errors by status").
-					Range(),
-			).
-			OverrideByName("400", []dashboard.DynamicConfigValue{
-				{Id: "displayName", Value: "400: Bad Request"}, fixedColor("#FFF176"),
-				{Id: "custom.drawStyle", Value: "line"}, {Id: "custom.showPoints", Value: "never"}, {Id: "custom.lineWidth", Value: 1},
-			}).
-			OverrideByName("401", []dashboard.DynamicConfigValue{
-				{Id: "displayName", Value: "401: Unauthorized"}, fixedColor("#FFB3B8"),
-				{Id: "custom.drawStyle", Value: "line"}, {Id: "custom.showPoints", Value: "never"}, {Id: "custom.lineWidth", Value: 1},
-			}).
-			OverrideByName("403", []dashboard.DynamicConfigValue{
-				{Id: "displayName", Value: "403: Forbidden"}, fixedColor("#FF9E80"),
-				{Id: "custom.drawStyle", Value: "line"}, {Id: "custom.showPoints", Value: "never"}, {Id: "custom.lineWidth", Value: 1},
-			}).
-			OverrideByName("404", []dashboard.DynamicConfigValue{
-				{Id: "displayName", Value: "404: Not Found"}, fixedColor("#FFB347"),
-				{Id: "custom.drawStyle", Value: "line"}, {Id: "custom.showPoints", Value: "never"}, {Id: "custom.lineWidth", Value: 1},
-			}).
-			OverrideByName("408", []dashboard.DynamicConfigValue{
-				{Id: "displayName", Value: "408: Request Timeout"}, fixedColor("#FFD966"),
-				{Id: "custom.drawStyle", Value: "line"}, {Id: "custom.showPoints", Value: "never"}, {Id: "custom.lineWidth", Value: 1},
-			}).
-			OverrideByName("409", []dashboard.DynamicConfigValue{
-				{Id: "displayName", Value: "409: Conflict"}, fixedColor("#FFE066"),
-				{Id: "custom.drawStyle", Value: "line"}, {Id: "custom.showPoints", Value: "never"}, {Id: "custom.lineWidth", Value: 1},
-			}).
-			OverrideByName("412", []dashboard.DynamicConfigValue{
-				{Id: "displayName", Value: "412: Invalid token"}, fixedColor("#FFE084"),
-				{Id: "custom.drawStyle", Value: "line"}, {Id: "custom.showPoints", Value: "never"}, {Id: "custom.lineWidth", Value: 1},
-			}).
-			OverrideByName("422", []dashboard.DynamicConfigValue{
-				{Id: "displayName", Value: "422: Unprocessable Entity"}, fixedColor("#FFC1E3"),
-				{Id: "custom.drawStyle", Value: "line"}, {Id: "custom.showPoints", Value: "never"}, {Id: "custom.lineWidth", Value: 1},
-			}).
-			OverrideByName("429", []dashboard.DynamicConfigValue{
-				{Id: "displayName", Value: "429: Too Many Requests"}, fixedColor("#FFEE58"),
-				{Id: "custom.drawStyle", Value: "line"}, {Id: "custom.showPoints", Value: "never"}, {Id: "custom.lineWidth", Value: 1},
-			}).
-			WithOverride(dashboard.MatcherConfig{Id: "byRegexp", Options: ".*"},
-				[]dashboard.DynamicConfigValue{
-					{Id: "custom.drawStyle", Value: "line"},
-					{Id: "custom.showPoints", Value: "never"},
-					{Id: "custom.lineWidth", Value: 1},
-				},
-			),
+		applyHttpStatusOverrides(
+			timeseries.NewPanelBuilder().
+				Title("Write errors").
+				Datasource(DatasourceRef).
+				Description("Number of failed metrics ingestion requests per second, by status code").
+				Unit("reqps").
+				GridPos(dashboard.GridPos{H: 8, W: 12, X: 12, Y: 1}).
+				WithTarget(
+					prometheus.NewDataqueryBuilder().
+						Expr(`sum by (status_code) (rate(requests_total{status_code!~"2.*", type="write"}[$__rate_interval])) or on() vector(0)`).
+						LegendFormat("{{status_code}}").
+						RefId("Write errors by status").
+						Range(),
+				),
+		),
 	).
 	WithPanel(
 		timeseries.NewPanelBuilder().
@@ -164,35 +123,21 @@ var NebiusObservability = dashboard.NewDashboardBuilder("Nebius Observability Pl
 			),
 	).
 	WithPanel(
-		timeseries.NewPanelBuilder().
-			Title("Read errors").
-			Datasource(DatasourceRef).
-			Description("Number of failed metrics read requests per second, by status code").
-			Unit("reqps").
-			GridPos(dashboard.GridPos{H: 8, W: 12, X: 12, Y: 9}).
-			WithTarget(
-				prometheus.NewDataqueryBuilder().
-					Expr(`sum by (status_code) (rate(requests_total{status_code!~"2.*", type="read"}[$__rate_interval])) or on() vector(0)`).
-					LegendFormat("{{status_code}}").
-					RefId("Read errors by status").
-					Range(),
-			).
-			OverrideByName("400", []dashboard.DynamicConfigValue{{Id: "displayName", Value: "400: Bad Request"}, fixedColor("#FFF176")}).
-			OverrideByName("401", []dashboard.DynamicConfigValue{{Id: "displayName", Value: "401: Unauthorized"}, fixedColor("#FFB3B8")}).
-			OverrideByName("403", []dashboard.DynamicConfigValue{{Id: "displayName", Value: "403: Forbidden"}, fixedColor("#FF9E80")}).
-			OverrideByName("404", []dashboard.DynamicConfigValue{{Id: "displayName", Value: "404: Not Found"}, fixedColor("#FFB347")}).
-			OverrideByName("408", []dashboard.DynamicConfigValue{{Id: "displayName", Value: "408: Request Timeout"}, fixedColor("#FFD966")}).
-			OverrideByName("409", []dashboard.DynamicConfigValue{{Id: "displayName", Value: "409: Conflict"}, fixedColor("#FFE066")}).
-			OverrideByName("412", []dashboard.DynamicConfigValue{{Id: "displayName", Value: "412: Invalid token"}, fixedColor("#FFE084")}).
-			OverrideByName("422", []dashboard.DynamicConfigValue{{Id: "displayName", Value: "422: Unprocessable Entity"}, fixedColor("#FFC1E3")}).
-			OverrideByName("429", []dashboard.DynamicConfigValue{{Id: "displayName", Value: "429: Too Many Requests"}, fixedColor("#FFEE58")}).
-			WithOverride(dashboard.MatcherConfig{Id: "byRegexp", Options: ".*"},
-				[]dashboard.DynamicConfigValue{
-					{Id: "custom.drawStyle", Value: "line"},
-					{Id: "custom.showPoints", Value: "never"},
-					{Id: "custom.lineWidth", Value: 1},
-				},
-			),
+		applyHttpStatusOverrides(
+			timeseries.NewPanelBuilder().
+				Title("Read errors").
+				Datasource(DatasourceRef).
+				Description("Number of failed metrics read requests per second, by status code").
+				Unit("reqps").
+				GridPos(dashboard.GridPos{H: 8, W: 12, X: 12, Y: 9}).
+				WithTarget(
+					prometheus.NewDataqueryBuilder().
+						Expr(`sum by (status_code) (rate(requests_total{status_code!~"2.*", type="read"}[$__rate_interval])) or on() vector(0)`).
+						LegendFormat("{{status_code}}").
+						RefId("Read errors by status").
+						Range(),
+				),
+		),
 	).
 	WithPanel(
 		timeseries.NewPanelBuilder().
@@ -394,4 +339,63 @@ func fixedColor(col string) dashboard.DynamicConfigValue {
 		FixedColor(col).
 		Build()
 	return dashboard.DynamicConfigValue{Id: "color", Value: c}
+}
+
+func applyHttpStatusOverrides(p *timeseries.PanelBuilder) *timeseries.PanelBuilder {
+	return p.
+		OverrideByName("400", []dashboard.DynamicConfigValue{
+			{Id: "displayName", Value: "400: Bad Request"}, fixedColor("#FFF176"),
+			{Id: "custom.drawStyle", Value: "line"}, {Id: "custom.showPoints", Value: "never"}, {Id: "custom.lineWidth", Value: 1},
+		}).
+		OverrideByName("401", []dashboard.DynamicConfigValue{
+			{Id: "displayName", Value: "401: Unauthorized"}, fixedColor("#FFB3B8"),
+			{Id: "custom.drawStyle", Value: "line"}, {Id: "custom.showPoints", Value: "never"}, {Id: "custom.lineWidth", Value: 1},
+		}).
+		OverrideByName("403", []dashboard.DynamicConfigValue{
+			{Id: "displayName", Value: "403: Forbidden"}, fixedColor("#FF9E80"),
+			{Id: "custom.drawStyle", Value: "line"}, {Id: "custom.showPoints", Value: "never"}, {Id: "custom.lineWidth", Value: 1},
+		}).
+		OverrideByName("404", []dashboard.DynamicConfigValue{
+			{Id: "displayName", Value: "404: Not Found"}, fixedColor("#FFB347"),
+			{Id: "custom.drawStyle", Value: "line"}, {Id: "custom.showPoints", Value: "never"}, {Id: "custom.lineWidth", Value: 1},
+		}).
+		OverrideByName("408", []dashboard.DynamicConfigValue{
+			{Id: "displayName", Value: "408: Request Timeout"}, fixedColor("#FFD966"),
+			{Id: "custom.drawStyle", Value: "line"}, {Id: "custom.showPoints", Value: "never"}, {Id: "custom.lineWidth", Value: 1},
+		}).
+		OverrideByName("409", []dashboard.DynamicConfigValue{
+			{Id: "displayName", Value: "409: Conflict"}, fixedColor("#FFE066"),
+			{Id: "custom.drawStyle", Value: "line"}, {Id: "custom.showPoints", Value: "never"}, {Id: "custom.lineWidth", Value: 1},
+		}).
+		OverrideByName("412", []dashboard.DynamicConfigValue{
+			{Id: "displayName", Value: "412: Invalid token"}, fixedColor("#FFE084"),
+			{Id: "custom.drawStyle", Value: "line"}, {Id: "custom.showPoints", Value: "never"}, {Id: "custom.lineWidth", Value: 1},
+		}).
+		OverrideByName("422", []dashboard.DynamicConfigValue{
+			{Id: "displayName", Value: "422: Unprocessable Entity"}, fixedColor("#FFC1E3"),
+			{Id: "custom.drawStyle", Value: "line"}, {Id: "custom.showPoints", Value: "never"}, {Id: "custom.lineWidth", Value: 1},
+		}).
+		OverrideByName("429", []dashboard.DynamicConfigValue{
+			{Id: "displayName", Value: "429: Too Many Requests"}, fixedColor("#FFEE58"),
+			{Id: "custom.drawStyle", Value: "line"}, {Id: "custom.showPoints", Value: "never"}, {Id: "custom.lineWidth", Value: 1},
+		}).
+		OverrideByName("502", []dashboard.DynamicConfigValue{
+			{Id: "displayName", Value: "502: Bad Gateway"}, fixedColor("#FF8A80"),
+			{Id: "custom.drawStyle", Value: "line"}, {Id: "custom.showPoints", Value: "never"}, {Id: "custom.lineWidth", Value: 1},
+		}).
+		OverrideByName("503", []dashboard.DynamicConfigValue{
+			{Id: "displayName", Value: "503: Service Unavailable"}, fixedColor("#FF5252"),
+			{Id: "custom.drawStyle", Value: "line"}, {Id: "custom.showPoints", Value: "never"}, {Id: "custom.lineWidth", Value: 1},
+		}).
+		OverrideByName("504", []dashboard.DynamicConfigValue{
+			{Id: "displayName", Value: "504: Gateway Timeout"}, fixedColor("#E57373"),
+			{Id: "custom.drawStyle", Value: "line"}, {Id: "custom.showPoints", Value: "never"}, {Id: "custom.lineWidth", Value: 1},
+		}).
+		WithOverride(dashboard.MatcherConfig{Id: "byRegexp", Options: ".*"},
+			[]dashboard.DynamicConfigValue{
+				{Id: "custom.drawStyle", Value: "line"},
+				{Id: "custom.showPoints", Value: "never"},
+				{Id: "custom.lineWidth", Value: 1},
+			},
+		)
 }
