@@ -8,17 +8,6 @@ import (
 	"github.com/grafana/grafana-foundation-sdk/go/units"
 )
 
-// NOTE: This file assumes these helpers already exist in your repo (they were referenced in the old code):
-//   - var DatasourceVar dashboard.Variable
-//   - var DatasourceRef dashboard.DataSourceRef (uid: ${datasource}, type: prometheus)
-//   - func New(string) *string   (or equivalent helper used by the SDK var query wrapper)
-//
-// The goal here is to generate the *new* dashboard behavior/layout:
-// - Top row: "Storage space": Traffic + Total bucket size + Space by storage class
-// - Repeating row per bucket: "Requests for $bucket": Read + Modify + API errors
-// - "Objects statistics": Object counts (+ inflight) + Space by object type (+ inflight) + Object counts by storage class
-// - bucket variable is multi => bucket=~"$bucket" and sum by(bucket) where needed.
-
 var NebiusObjectStorage = dashboard.NewDashboardBuilder("Nebius Object Storage").
 	Uid("nebius-object-storage").
 	Description("Nebius Object Storage Overview.").
@@ -37,7 +26,6 @@ var NebiusObjectStorage = dashboard.NewDashboardBuilder("Nebius Object Storage")
 		Icon("external link"),
 	).
 
-	// Variables (datasource default must be "Nebius Services"; bucket is multi + includeAll)
 	WithVariable(DatasourceVar).
 	WithVariable(
 		dashboard.NewQueryVariableBuilder("bucket").
@@ -58,7 +46,6 @@ var NebiusObjectStorage = dashboard.NewDashboardBuilder("Nebius Object Storage")
 		dashboard.NewRowBuilder("Storage space"),
 	).
 
-	// Traffic (per bucket; multi bucket var => bucket=~"$bucket" + sum by(bucket))
 	WithPanel(timeseries.NewPanelBuilder().
 		Title("Traffic").
 		Description("Data transfer speed to and from storage.").
@@ -66,7 +53,6 @@ var NebiusObjectStorage = dashboard.NewDashboardBuilder("Nebius Object Storage")
 		WithTarget(prometheus.NewDataqueryBuilder().
 			Expr(`sum by(bucket) (rate(http_bytes_sent{bucket=~"$bucket"}[$__rate_interval])) OR on() vector(0)`).
 			LegendFormat("Download {{bucket}}").
-			// The new JSON uses A/B refs; SDK usually assigns, but you can force if your repo expects it:
 			RefId("A"),
 		).
 		WithTarget(prometheus.NewDataqueryBuilder().
@@ -309,7 +295,6 @@ var NebiusObjectStorage = dashboard.NewDashboardBuilder("Nebius Object Storage")
 		Span(8),
 	).
 
-	// Dashboard-wide settings (match new JSON behavior)
 	Time("now-24h", "now").
 	Refresh("1m").
 	Readonly()
